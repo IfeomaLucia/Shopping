@@ -1,11 +1,8 @@
 var express = require('express'); 
 var app = express();
 
+var productRouter = require('./routes/products');
 
-app.use(function(req, res, next){
-    res.status(200).json({
-        message: 'It works'
-    })
-})
+app.use('/products', productRouter);
 
 module.exports = app;
