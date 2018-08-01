@@ -2,9 +2,13 @@ var express = require('express');
 var app = express();
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
 
 var productRouter = require('./api/routes/products');
 var orderRouter = require('./api/routes/orders');
+
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost:27017/nkataa', {useNewUrlParser: true});
 
 //Middleware function
 app.use(morgan('dev'));

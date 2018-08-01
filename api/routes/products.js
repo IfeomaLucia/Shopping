@@ -1,5 +1,8 @@
 var express = require('express');
 var router = express.Router();
+var mongoose = require('mongoose');
+
+var Product = require('../Models/Product');
 
 router.get('/', function(req, res, next){
     res.status(200).json({
@@ -8,11 +11,17 @@ router.get('/', function(req, res, next){
 })
 
 router.post('/', function(req, res, next){
-    var product = {
+    var product = new Product({
+        _id: new mongoose.Types.ObjectId,
         name: req.body.name,
         price: req.body.price
-    }
-    res.status(200).json({
+    });
+    product.save()
+    .then(result => {
+        console.log(result);
+    })
+    .catch(err => console.log(err));
+    res.status(201).json({
         message: 'Handling POST requests to /products',
         product: product
     })
@@ -20,16 +29,16 @@ router.post('/', function(req, res, next){
 
 router.get('/:id', function(req, res, next){
     var id = req.params.id;
-    if(id === 'special'){
-        res.status(200).json({
-            message: 'You discovered the special ID',
-            id: id
-        })
-    }else{
-        res.status(200).json({
-           message: 'You passed an ID' 
-        })
-    }
+    Product.findById(id)
+    .exec()
+    .then(doc => {
+        console.log(doc);
+        res.status(200).json(doc);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({error: err}); 
+    })
 })
 
 router.patch('/:id', function(req, res, next){
