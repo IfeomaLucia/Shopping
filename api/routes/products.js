@@ -6,12 +6,31 @@ var Product = require('../Models/Product');
 
 router.get('/', function(req, res, next){
    Product.find()
+   .select('-__v')
    .exec()
    .then(docs => {
-       console.log(docs);
-       res.status(200).json(docs);
+       var response = {
+           count: docs.length,
+           products: docs.map(doc => {
+               return {
+                   name: doc.name,
+                   price: doc.price,
+                   _id: doc._id,
+                   request: {
+                       type: 'GET',
+                       url: 'http://localhost:3000/products/' + doc._id
+                   }
+               }
+           })
+       }
+       res.status(200).json(response);
    })
-   .catch()
+   .catch(err => {
+       console.log(err);
+       res.status(500).json({
+           error: err
+       })
+   })
 })
 
 router.post('/', function(req, res, next){
@@ -21,11 +40,20 @@ router.post('/', function(req, res, next){
         price: req.body.price
     });
     product.save()
+    .select('-__v')
     .then(result => {
         console.log(result);
         res.status(201).json({
-            message: 'Handling POST requests to /products',
-            createdProduct: result
+            message: 'Creation of product successfully',
+            createdProduct: {
+                name: result.name,
+                price: result.price,
+                _id: result._id,
+                request: {
+                    type: 'GET',
+                    url: 'http://localhost:3000/products/' + result._id
+                }
+            }
         })
     })
     .catch(err => {
@@ -39,11 +67,18 @@ router.post('/', function(req, res, next){
 router.get('/:id', function(req, res, next){
     var id = req.params.id;
     Product.findById(id)
+    .select('-__v')
     .exec()
     .then(doc => {
         console.log('From database', doc);
         if(doc){
-            res.status(200).json(doc);
+            res.status(200).json({
+                product: doc,
+                request: {
+                    type: 'GET',
+                    url: 'http://localhost:3000/products/'
+                }
+            });
         } else {
             res.status(404).json({message: 'No valid entry for provided Id'});
         }
@@ -63,8 +98,13 @@ router.patch('/:id', function(req, res, next){
     Product.update({_id: id}, { $set: updateOps})
     .exec()
     .then(result => {
-        console.log(result);
-        res.status(200).json(result);
+        res.status(200).json({
+            message: 'Product updated',
+            request: {
+                type: 'GET',
+                url: 'http://localhost:3000/products/' + id
+            }
+        });
     })
     .catch(err => {
         console.log(err);
@@ -79,7 +119,14 @@ router.delete('/:id', function(req, res, next){
     Product.remove({_id: id})
     .exec()
     .then(result => {
-        res.status(200).json(result);
+        res.status(200).json({
+            message: 'Product deleted',
+            request: {
+                type: 'POST',
+                url: 'http://localhost:3000/products/',
+                body: {name: 'String', price: 'Number'}
+            }
+        });
     })
     .catch(err => {
         console.log(err);
