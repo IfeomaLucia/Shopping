@@ -6,9 +6,10 @@ var mongoose = require('mongoose');
 
 var productRouter = require('./api/routes/products');
 var orderRouter = require('./api/routes/orders');
+var userRouter = require('./api/routes/users');
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/nkataa', {useNewUrlParser: true});
+mongoose.connect('mongodb://localhost:27017/shop', {useNewUrlParser: true});
 
 //Middleware function
 app.use(morgan('dev'));
@@ -32,6 +33,7 @@ app.use(function(req, res, next){
 //Routes for requests
 app.use('/products', productRouter);
 app.use('/orders', orderRouter);
+app.use('/user', userRouter);
 
 app.use(function(req, res, next){
     var error = new Error('Url not found');
