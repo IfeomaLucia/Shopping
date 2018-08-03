@@ -12,6 +12,7 @@ mongoose.connect('mongodb://localhost:27017/nkataa', {useNewUrlParser: true});
 
 //Middleware function
 app.use(morgan('dev'));
+app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
@@ -24,7 +25,7 @@ app.use(function(req, res, next){
     if(req.method === 'OPTIONS'){
         res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, GET, DELETE');
         return res.status(200).json({});
-    }
+    } 
     next();
 })
 

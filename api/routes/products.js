@@ -1,6 +1,25 @@
 var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
+var multer = require('multer');
+
+var storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, "./uploads/");
+    },
+    filename: function(req, file, cb){
+        cb(null, file.originalname);
+    }
+})
+
+// var filefilter = function(req, file, cb){
+//     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+//         cb(null, true);
+//             }else{
+//                 cb(null, false)
+//             }
+// }
+var upload = multer({storage: storage});
 
 var Product = require('../Models/Product');
 
@@ -15,6 +34,7 @@ router.get('/', function(req, res, next){
                return {
                    name: doc.name,
                    price: doc.price,
+                   productImage: doc.productImage,
                    _id: doc._id,
                    request: {
                        type: 'GET',
@@ -33,14 +53,14 @@ router.get('/', function(req, res, next){
    })
 })
 
-router.post('/', function(req, res, next){
+router.post('/', upload.single('productImage'), function(req, res, next){ 
     var product = new Product({
         _id: new mongoose.Types.ObjectId,
         name: req.body.name,
-        price: req.body.price
+        price: req.body.price,
+        productImage: req.file.path
     });
     product.save()
-    .select('-__v')
     .then(result => {
         console.log(result);
         res.status(201).json({
